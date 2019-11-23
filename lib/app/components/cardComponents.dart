@@ -1,9 +1,15 @@
 import 'dart:async';
-import 'dart:math';
 
+import 'package:asi_authenticator/app/model/KeyUri.dart';
+import 'package:asi_authenticator/app/shared/OtpGenerator.dart';
 import 'package:flutter/material.dart';
+import 'package:otp/otp.dart';
+
+import 'Countdown.dart';
 
 class CardAuth extends StatefulWidget {
+  final UriKey issuer;
+  CardAuth(this.issuer);
   @override
   _CardAuthState createState() => _CardAuthState();
 }
@@ -12,13 +18,13 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
   String value;
   AnimationController _controller;
   final int initialValue = 10;
+  OtpGenerator opt = OtpGenerator();
 
   @override
   void initState() {
     super.initState();
-    this.value = Random().nextInt(100).toString() +
-        ' ' +
-        Random().nextInt(100).toString();
+    this.reset();
+
     _controller = new AnimationController(
       vsync: this,
       duration: new Duration(seconds: initialValue),
@@ -30,10 +36,10 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
         this._controller.repeat().then(this.reset());
       }
     });
-    _controller.forward(from: 3);
 
-    var oneSec = Duration(seconds: this.initialValue);
-    Timer.periodic(oneSec, (Timer t) => this.reset());
+    _controller.forward(from: 3);
+    Timer.periodic(
+        Duration(seconds: this.initialValue), (Timer t) => this.reset());
   }
 
   @override
@@ -51,7 +57,7 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
                   alignment: Alignment.topLeft,
                   child: Text(
                     this.value,
-                    style: TextStyle(color: Color(0xff0063B1), fontSize: 25), 
+                    style: TextStyle(color: Color(0xff0063B1), fontSize: 25),
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -76,40 +82,17 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
     );
   }
 
-  void resetx() {
-    setState(() {
-      this._controller.value = this.initialValue.roundToDouble();
-    });
-  }
-
   reset() {
-    print('set state');
     setState(() {
-      // this._controller.forward(period: Duration(seconds: initialValue));
-      this.value = Random().nextInt(100).toString() +
-          ' ' +
-          Random().nextInt(100).toString() +
-          ' ' +
-          Random().nextInt(100).toString() +
-          ' ' +
-          Random().nextInt(100).toString() +
-          ' ' +
-          Random().nextInt(100).toString() +
-          ' ' +
-          Random().nextInt(100).toString();
+      var result = this
+          .opt
+          .getTOTP("5HTNVFARMIDCAFSXV7QBMBTJRUVIZ2TQ", 1362302550000);
+
+      this.value =
+          result.substring(0, 3) + ' ' + result.substring(3, result.length);
+
+      var otpResult = OTP.generateTOTPCode("JBSWY3DPEHPK3PXP", 1362302550000);
+      print(otpResult);
     });
-  }
-}
-
-class Countdown extends AnimatedWidget {
-  Countdown({Key key, this.animation}) : super(key: key, listenable: animation);
-  Animation<int> animation;
-
-  @override
-  build(BuildContext context) {
-    return new Text(
-      animation.value.toString(),
-      style: new TextStyle(fontSize: 22.0),
-    );
   }
 }

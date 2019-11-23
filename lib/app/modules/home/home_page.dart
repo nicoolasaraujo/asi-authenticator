@@ -1,5 +1,7 @@
 import 'package:asi_authenticator/app/app_module.dart';
 import 'package:asi_authenticator/app/components/cardComponents.dart';
+import 'package:asi_authenticator/app/model/KeyUri.dart';
+import 'package:asi_authenticator/app/shared/OtpGenerator.dart';
 import 'package:flutter/material.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
 
@@ -16,11 +18,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var blocHome = HomeModule.to.getBloc<HomeBloc>();
-  List<String> list = List<String>.generate(5, (i) => "Item $i");
+  // "5HTNVFARMIDCAFSXV7QBMBTJRUVIZ2TQ"
+  OtpGenerator totp = OtpGenerator();
+
+  List<String> list = List<String>.generate(1, (i) => "Item $i");
   @override
-  void initState(){
-    // this.blocHome.initializeState();
-    // this.blocHome.initializeState();
+  void initState() {
     super.initState();
   }
 
@@ -30,14 +33,25 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: ListView.builder(
-        itemCount: this.list.length,
-        itemBuilder: (context, index){
-          return CardAuth();
+      body: StreamBuilder<List<UriKey>>(
+        stream: blocHome.outIssuers,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (context, index) {
+                  return CardAuth(snapshot.data[index]);
+                });
+          } else {
+            return Center(
+              child: Text("Nenhum registro encontrado"),
+            );
+          }
         },
       ),
-      floatingActionButton: IconButton(
-        icon: Icon(Icons.add),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xff0063B1),
+        child: Icon(Icons.add),
         onPressed: () => this.handleAddClick(),
       ),
     );
@@ -45,6 +59,22 @@ class _HomePageState extends State<HomePage> {
 
   void handleAddClick() async {
     String cameraScanResult = await scanner.scan();
-    print('Resultado: ' + cameraScanResult);
+    this._showModalSheet('Resultado: ' + cameraScanResult);
+    this.blocHome.addIssuers('teste');
+  }
+
+  void _showModalSheet(String readQrCode) {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Container(
+            alignment: Alignment.center,
+            child: Text(
+              'QRCODE: ' + readQrCode,
+              style: TextStyle(fontSize: 20),
+            ),
+            padding: EdgeInsets.all(40.0),
+          );
+        });
   }
 }
