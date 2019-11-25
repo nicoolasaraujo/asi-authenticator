@@ -1,6 +1,5 @@
-import 'package:asi_authenticator/app/model/KeyUri.dart';
+import 'package:asi_authenticator/app/model/Account.dart';
 import 'package:bloc/bloc.dart';
-import 'package:countdown/countdown.dart';
 import 'package:rxdart/rxdart.dart';
 
 enum HomeEvent { increment, decrement }
@@ -8,7 +7,7 @@ enum HomeEvent { increment, decrement }
 class HomeBloc extends Bloc<HomeEvent, int> {
 
   HomeBloc(){
-    this.listIssuers = List<UriKey>();
+    this.listIssuers = List<Account>();
   }
 
   @override
@@ -25,15 +24,22 @@ class HomeBloc extends Bloc<HomeEvent, int> {
     }
   }
 
-  List<UriKey> listIssuers;
-  var _issuersController = BehaviorSubject<List<UriKey>>();
+  List<Account> listIssuers;
+  var _issuersController = BehaviorSubject<List<Account>>();
 
-  Observable<List<UriKey>> get outIssuers => this._issuersController.stream;
-  Sink<List<UriKey>> get inIssuers => this._issuersController.sink;
+  Observable<List<Account>> get outIssuers => this._issuersController.stream;
+  Sink<List<Account>> get inIssuers => this._issuersController.sink;
 
   void addIssuers(String uri) {
-    var issuer = UriKey('5HTNVFARMIDCAFSXV7QBMBTJRUVIZ2TQ', 'teste');
+    var issuer = Account.withUri(uri);
     this.listIssuers.add(issuer);
     this.inIssuers.add(listIssuers);
   }
+
+  void handleUri() {
+
+  }
 }
+
+
+// otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30

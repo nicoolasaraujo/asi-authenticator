@@ -1,6 +1,5 @@
 import 'dart:async';
-
-import 'package:asi_authenticator/app/model/KeyUri.dart';
+import 'package:asi_authenticator/app/model/Account.dart';
 import 'package:asi_authenticator/app/shared/OtpGenerator.dart';
 import 'package:flutter/material.dart';
 import 'package:otp/otp.dart';
@@ -8,7 +7,7 @@ import 'package:otp/otp.dart';
 import 'Countdown.dart';
 
 class CardAuth extends StatefulWidget {
-  final UriKey issuer;
+  final Account issuer;
   CardAuth(this.issuer);
   @override
   _CardAuthState createState() => _CardAuthState();
@@ -16,8 +15,9 @@ class CardAuth extends StatefulWidget {
 
 class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
   String value;
+  String libValue;
   AnimationController _controller;
-  final int initialValue = 10;
+  final int initialValue = 30;
   OtpGenerator opt = OtpGenerator();
 
   @override
@@ -37,7 +37,7 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
       }
     });
 
-    _controller.forward(from: 3);
+    _controller.forward(from: this.initialValue.toDouble());
     Timer.periodic(
         Duration(seconds: this.initialValue), (Timer t) => this.reset());
   }
@@ -55,10 +55,28 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
                 flex: 8,
                 child: Align(
                   alignment: Alignment.topLeft,
-                  child: Text(
-                    this.value,
-                    style: TextStyle(color: Color(0xff0063B1), fontSize: 25),
-                    textAlign: TextAlign.left,
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        this.value,
+                        style:
+                            TextStyle(color: Color(0xff0063B1), fontSize: 25),
+                        textAlign: TextAlign.left,
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Lib:' + this.libValue,
+                        style:
+                            TextStyle(color: Color(0xff0063B1), fontSize: 25),
+                        textAlign: TextAlign.left,
+                      ),
+                      Text(
+                        this.widget.issuer.issuer,
+                        style: TextStyle(
+                          color: Color(0xffA9A9A9)
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ),
@@ -84,15 +102,18 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
 
   reset() {
     setState(() {
-      var result = this
-          .opt
-          .getTOTP("5HTNVFARMIDCAFSXV7QBMBTJRUVIZ2TQ", 1362302550000);
+      print('set state');
+      var result = this.opt.getTOTP(this.widget.issuer.secret, DateTime.now().millisecondsSinceEpoch);
 
       this.value =
           result.substring(0, 3) + ' ' + result.substring(3, result.length);
 
-      var otpResult = OTP.generateTOTPCode("JBSWY3DPEHPK3PXP", 1362302550000);
-      print(otpResult);
+      this.libValue = OTP.generateTOTPCode(
+          this.widget.issuer.secret, DateTime.now().millisecondsSinceEpoch,
+          algorithm: Algorithm.SHA1).toString();
+
+      this.libValue =  libValue.substring(0, 3) + ' ' + libValue.substring(3, libValue.length);
+
     });
   }
 }

@@ -1,6 +1,5 @@
-import 'package:asi_authenticator/app/app_module.dart';
 import 'package:asi_authenticator/app/components/cardComponents.dart';
-import 'package:asi_authenticator/app/model/KeyUri.dart';
+import 'package:asi_authenticator/app/model/Account.dart';
 import 'package:asi_authenticator/app/shared/OtpGenerator.dart';
 import 'package:flutter/material.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
@@ -33,7 +32,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: StreamBuilder<List<UriKey>>(
+      body: StreamBuilder<List<Account>>(
         stream: blocHome.outIssuers,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -60,7 +59,7 @@ class _HomePageState extends State<HomePage> {
   void handleAddClick() async {
     String cameraScanResult = await scanner.scan();
     this._showModalSheet('Resultado: ' + cameraScanResult);
-    this.blocHome.addIssuers('teste');
+    this.blocHome.addIssuers(cameraScanResult);
   }
 
   void _showModalSheet(String readQrCode) {
