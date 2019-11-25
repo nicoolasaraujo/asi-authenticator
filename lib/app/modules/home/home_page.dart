@@ -20,7 +20,6 @@ class _HomePageState extends State<HomePage> {
   // "5HTNVFARMIDCAFSXV7QBMBTJRUVIZ2TQ"
   OtpGenerator totp = OtpGenerator();
 
-  List<String> list = List<String>.generate(1, (i) => "Item $i");
   @override
   void initState() {
     super.initState();
@@ -58,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 
   void handleAddClick() async {
     String cameraScanResult = await scanner.scan();
-    this._showModalSheet('Resultado: ' + cameraScanResult);
+    this._showModalSheet(cameraScanResult);
     this.blocHome.addIssuers(cameraScanResult);
   }
 

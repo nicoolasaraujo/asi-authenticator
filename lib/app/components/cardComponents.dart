@@ -33,11 +33,12 @@ class _CardAuthState extends State<CardAuth> with TickerProviderStateMixin {
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         status = AnimationStatus.forward;
-        this._controller.repeat().then(this.reset());
+        this._controller.repeat();
       }
     });
 
     _controller.forward(from: this.initialValue.toDouble());
+    
     Timer.periodic(
         Duration(seconds: this.initialValue), (Timer t) => this.reset());
   }
